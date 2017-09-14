@@ -67,7 +67,7 @@ string = re.sub(r'label ".+"', lambda x: 'label "a%s"' %next(lbl_counter), strin
 G = nx.parse_gml(string)
 stream = stdout
 
-stream.write('p edge %s %s\n' %(G.number_of_nodes(), G.number_of_edges()))
+stream.write('p tw %s %s\n' %(G.number_of_nodes(), G.number_of_edges()))
 G = nx.convert_node_labels_to_integers(G, first_label=1)
 
 text = r'''c
