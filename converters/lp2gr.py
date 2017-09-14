@@ -1,0 +1,111 @@
+#!/usr/bin/env python
+from optparse import OptionParser
+import select
+from sys import stderr, stdin, stdout
+import networkx as nx
+
+import compression
+import lp_parse import *
+
+fromfile=True
+if select.select([stdin,],[],[],0.0)[0]:
+    inp=stdin
+    fromfile=False
+else:
+    parser = OptionParser()
+    parser.add_option('-f', '--file', dest='filename',
+                  help='Input file', metavar='FILE')
+    (options, args) = parser.parse_args()
+    if not options.filename:
+        stderr.write('Missing filename')
+        parser.print_help(stderr)
+        stderr.write('\n')
+        exit(1)
+    inp = open(options.filename, 'r')
+    fromfile=True
+
+
+
+def parse_lpinput(l):
+    logging.info('Parsing starts')
+    p   = Parser()
+    try:
+        l = p.parse('x_', f)
+        logging.info('Parsing done')
+
+
+    for r in l.statements:
+        neg = filter(lambda x: x<0,r.body)
+        #add pairwise head
+        for a1, a2 in combinations(r.head,2):
+            ctl.ground([('edge',[a1,a2])])
+            #add pairwise body
+        for a,c in izip(ifilter(lambda x: l.symtab.tab.get(x,None),r.head),imap(lambda x: -x, neg)):
+            ctl.ground([('edge',[a,c])])
+
+    except IOError:
+        sys.stderr.write("error reading from: {0}\n".format(sin.filename()))
+        sys.stderr.flush()
+        raise IOError
+
+
+
+
+inp()
+
+    
+G = nx.Graph()
+
+for line in inp.readlines():
+    line=line.split()
+    if line==[]:
+        continue
+    if line[0] == 'c':
+        stdout.write('%s\n' %' '.join(line))
+        continue
+    if line[0]!='p':
+        G.add_edge(int(line[1]), int(line[2]))
+
+#print nx.number_of_nodes(G)
+#
+#trivial preprocessing
+changed = True
+while changed:
+    changed = False
+    for v in list(G.nodes_iter()):
+        if len(G.neighbors(v))<=1:
+            G.remove_node(v)
+            changed = True
+            continue
+        if len(G.neighbors(v))==2:
+            v1,v2=G.neighbors(v)
+            G.add_edge(v1,v2)
+            G.remove_node(v)
+            #G.remove_edge(v,v1)
+            #G.remove_edge(v,v2)
+            changed = True
+            continue
+
+#from cStringIO import StringIO
+#out = StringIO()
+#nx.write_gml(G,out)
+#stdout.write(out.getvalue())
+
+G=nx.convert_node_labels_to_integers(G)
+
+stdout.write('p tw %s %s\n' %(nx.number_of_nodes(G),nx.number_of_edges(G)))
+for u,v in G.edges_iter():
+    stdout.write('%s %s\n' %(u+1,v+1))
+
+if fromfile:
+    inp.close()
+
+try:
+    stdout.close()
+except:
+    pass
+
+try:
+    stderr.close()
+except:
+    pass
